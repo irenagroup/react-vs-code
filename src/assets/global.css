@@ -1,0 +1,65 @@
+html, body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 12px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#root {
+  background-color: #CCCCCC;
+  display: block;
+}
+
+.nav{
+  float:left;
+}
+
+ul.vertical {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 80px;
+    background-color: #f1f1f1;
+    float: left;
+    height: 100vh;
+  }
+
+.topic
+{
+    width: 100%;
+    float: left;
+}
+
+  ul.horizontal {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #f1f1f1;
+    list-style: none;
+    float: left;
+  }
+
+  ul.horizontal li {
+    float: left;
+}
+  
+  li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+  }
+  
+  /* Change the link color on hover */
+  li a:hover {
+    background-color: #555;
+    color: white;
+  }
+
+  .content {
+
+    float: right;
+    width: 80%;
+    float: right;
+  }
+  
