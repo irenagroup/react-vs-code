@@ -1,11 +1,24 @@
 
 import React from 'react';
-import DangerButton from './danger-button.component';
+import { getSearch } from '../services/search.service';
+import StockItem from './stock.component';
+import { addStock,VisibilityFilters, addAllStocks } from '../redux/actions';
+import { connect } from "react-redux";
+import Footer from '../components/footer'
+
+// @TODO: fix isLoading apply to state
+// @TODO: fix remove stock option
+// @TODO: implement sorting based on stock
 
 
 export class Filediff extends React.Component {
+  loadingTest= false;
   state = {
-    hits: undefined,
+    error: undefined,
+    stocks: undefined,
+    stockNamefield: undefined,
+    stockPriceField: undefined,
+    stockTickerfield: undefined,
     isLoading: null,
     datafield: '21',
     datafield2: '333'
@@ -16,19 +29,30 @@ export class Filediff extends React.Component {
     super(props);
     const { params } = this.props.match;
     this.handleInputChange = this.handleInputChange.bind(this);
-
+    this.handleStockSubmit = this.handleStockSubmit.bind(this);
     console.warn(params);
 
   }
   handleReverse = event => {
     event.preventDefault();
-    console.warn(this.state);
-
-    console.warn(event);
-    this.getHits(this.state.datafield);
+    this.getStocks(this.state.datafield);
 
   }
 
+  handleStockSubmit = event => {
+    event.preventDefault();
+    this.props.addStock({
+      securityDescription : this.state.stockNamefield,
+      symbol: this.state.stockTickerfield,
+      totalCost: this.state.stockPricefield
+    });
+
+   console.warn(this.props.stocks);
+
+  }
+
+
+  
   handleInputChange(event) {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
@@ -39,18 +63,31 @@ export class Filediff extends React.Component {
     });
   }
 
+  shouldComponentUpdate(nextProps){
+    if(nextProps.stocks !== this.props.stocks) {
+      this.loadingTest = false;
+      // this.render();
+      return true;
+    }
+    return false;
+  }
 
   render() {
-    const { isLoading, hits } = this.state;
+    const {  error } = this.state;
     let loadingsection;
-    if (isLoading === null) {
+    const stocks = this.props.stocks;
+    if (error && this.loadingTest === false) {
+      loadingsection = <div >Error found!</div>;
+
+    }
+    else if (!this.loadingTest === null) {
       loadingsection = <div >Please hit submit</div>;
-    } else if (isLoading === true) {
+    } else if (this.loadingTest === true) {
       loadingsection = <div >          <h3>Loading...</h3></div>;
-    } else if (isLoading === false) {
-      loadingsection = hits.map((hit, index) => {
+    } else if (this.loadingTest === null || (this.loadingTest === false && stocks)) {
+      loadingsection = stocks.map((stock, index) => {
         return (
-          <DangerButton hit={hit} key={hit.objectID}></DangerButton>
+          <StockItem stock={stock} key={stock.id}></StockItem>
         );
 
       });
@@ -67,25 +104,45 @@ export class Filediff extends React.Component {
           onChange={this.handleInputChange}
           defaultValue={this.state.datafield2} />
         <button>Submit</button>
-      </form>
+      </form><hr/>
+      Add stock fields
+      <form onSubmit={this.handleStockSubmit}>
+       Ticker: <input type='text' name='stockTickerfield'
+          onChange={this.handleInputChange}
+           /><br/>
+        Description: <input type='text' name='stockNamefield'
+          onChange={this.handleInputChange} /><br/>
+           Price: <input type='text' name='stockPricefield'
+          onChange={this.handleInputChange} /><br/>
+        <button>Add stock</button>
+      </form><hr/>
+      
       {loadingsection}
+      <Footer />
+
     </React.Fragment>);
   }
 
-  getHits(valueSearch) {
+  getStocks(valueSearch) {
     this.setState({
       isLoading: true
-    })
-    fetch(`https://hn.algolia.com/api/v1/search?query=${valueSearch}`)
-      .then(response => response.json())
-      .then((data) => {
-        console.warn(data.hits);
+    });
+    this.loadingTest = true;
+    this.render();
 
+    getSearch(valueSearch)
+      .then((data) => {
+        this.props.addAllStocks(data.accounts.account[0].securityDetails.securityDetail);
+        console.warn(this.props.stocks);
+
+      }).catch((error)=>{
+        console.warn(error);
         this.setState({
           isLoading: false,
-          hits: data.hits
+          error: error.errorType
         });
       })
+      
 
   }
   componentDidMount() {
@@ -93,4 +150,33 @@ export class Filediff extends React.Component {
 }
 
 
-export default Filediff;
+const getVisibleStocks = (todos, filter) => {
+  switch (filter) {
+    case VisibilityFilters.SHOW_ALL:
+      return todos.stocks;
+    case VisibilityFilters.SHOW_COMPLETED:
+      debugger;
+      return todos.stocks.filter(t => t.completed)
+    case VisibilityFilters.SHOW_ACTIVE:
+      return todos.stocks.filter(t => !t.completed)
+    default:
+      throw new Error('Unknown filter: ' + filter)
+  }
+}
+
+const mapStateToProps = state => ({
+//  stocks: state
+  stocks: getVisibleStocks(state, state.visibilityFilter)
+});
+
+
+const mapDispatchToProps = dispatch => ({
+  addStock: stock => dispatch(addStock(stock)),
+  addAllStocks: stocks=> dispatch(addAllStocks(stocks))
+});
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)((Filediff));

@@ -1,0 +1,5 @@
+> apply pipe to number
+> apply localization to number
+> do unit testing pipe
+> add store to react
+> make call to equity

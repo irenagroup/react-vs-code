@@ -1,13 +1,21 @@
 let nextTodoId = 0
-export const addTodo = text => ({
-  type: 'ADD_TODO',
+export const addStock = stock => ({
+  type: 'ADD_STOCK',
   id: nextTodoId++,
-  text
+  stock
 })
 
-export const getProduct = id =>({
-    type: 'GET_PRODUCT',
-    id: id
+export const getStocks = stocks => (
+{
+  type: 'GET_STOCKS',
+  currentId: nextTodoId++,
+  stocks
+})
+
+export const addAllStocks = stocks =>({
+    type: 'ADD_ALL_STOCKS',
+    currentId: nextTodoId++,
+    stocks
 })
 
 
@@ -17,8 +25,8 @@ export const setVisibilityFilter = filter => ({
   filter
 })
 
-export const toggleTodo = id => ({
-  type: 'TOGGLE_TODO',
+export const deleteStock = id => ({
+  type: 'DELETE_STOCK',
   id
 })
 

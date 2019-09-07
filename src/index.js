@@ -3,12 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose  } from 'redux';
 import { Provider } from 'react-redux';
+import rootReducer  from './redux/reducers';
+import { forbiddenWordsMiddleware } from './redux/middleware';
 
-const store = createStore(function (){
-    return null;
-})
+const storeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+
+const store = createStore(
+    rootReducer,
+    storeEnhancers(applyMiddleware(forbiddenWordsMiddleware))
+);
 
 ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('root'));
 
